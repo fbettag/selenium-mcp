@@ -1,0 +1,47 @@
+Selenium MCP Server has been deployed!
+
+{{- if .Values.browserless.enabled }}
+Browserless has been deployed as part of this release.
+{{- else }}
+Using existing browserless service: {{ include "selenium-mcp.browserlessUrl" . }}
+{{- end }}
+
+Get the MCP server URL:
+{{- if .Values.ingress.enabled }}
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}{{ range .paths }}{{ .path }}{{ end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "selenium-mcp.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "selenium-mcp.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "selenium-mcp.fullname" . }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else }}
+  echo "Service type: {{ .Values.service.type }}"
+  kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "selenium-mcp.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+{{- end }}
+
+To use with Claude Desktop, add to your configuration:
+
+{
+  "mcpServers": {
+    "selenium": {
+      "command": "npx",
+      "args": ["-y", "@fbettag/selenium-mcp"],
+      "env": {
+        "BROWSERLESS_URL": "{{ include "selenium-mcp.browserlessUrl" . }}"
+        {{- if .Values.mcp.browserlessToken }},
+        "BROWSERLESS_TOKEN": "{{ .Values.mcp.browserlessToken }}"
+        {{- else if .Values.mcp.existingSecret }},
+        "BROWSERLESS_TOKEN": "$BROWSERLESS_TOKEN"  # Set this environment variable from your secret
+        {{- end }}
+      }
+    }
+  }
+}
+
+For more information, visit: https://github.com/fbettag/selenium-mcp

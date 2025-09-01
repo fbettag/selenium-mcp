@@ -1,0 +1,28 @@
+apiVersion: v2
+name: selenium-mcp
+description: Selenium MCP Server for browserless deployments
+version: 0.1.0
+appVersion: "0.1.0"
+type: application
+
+# Dependencies: This chart is designed to work with external browserless services
+# To deploy browserless alongside, consider using a separate browserless chart
+
+maintainers:
+  - name: Franz Bettag
+
+sources:
+  - https://github.com/fbettag/selenium-mcp
+
+keywords:
+  - selenium
+  - mcp
+  - browserless
+  - automation
+  - kubernetes
+
+annotations:
+  artifacthub.io/prerelease: "false"
+  artifacthub.io/links: |
+    - name: GitHub Repository
+      url: https://github.com/your-username/selenium-mcp-server

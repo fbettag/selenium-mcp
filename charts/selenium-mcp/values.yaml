@@ -1,0 +1,151 @@
+# Default values for selenium-mcp
+# This chart deploys a Selenium MCP Server that connects to browserless
+
+# replicaCount: Number of replicas for the MCP server
+replicaCount: 2
+
+# image: Docker image configuration
+image:
+  repository: ghcr.io/your-username/selenium-mcp-server
+  pullPolicy: IfNotPresent
+  tag: "latest"
+  # Overrides the image tag whose default is the chart appVersion.
+
+# imagePullSecrets: Secrets for pulling images from private registries
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# serviceAccount: Service account configuration
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# podAnnotations: Annotations to add to the pod
+podAnnotations: {}
+
+# podSecurityContext: Security context for the pod
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+# securityContext: Security context for the container
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+# service: Service configuration
+service:
+  type: ClusterIP
+  port: 8000
+  # nodePort: If type is NodePort, specify the node port
+
+# resources: Resource limits and requests
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# autoscaling: Horizontal pod autoscaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# nodeSelector: Node labels for pod assignment
+nodeSelector: {}
+
+# tolerations: Tolerations for pod assignment
+tolerations: []
+
+# affinity: Affinity settings for pod assignment
+affinity: {}
+
+# browserless: Browserless service configuration
+# You can either deploy browserless with this chart or use an existing service
+browserless:
+  # enabled: Set to true to deploy browserless as part of this chart
+  enabled: false
+  
+  # If not deploying browserless, configure connection to existing service
+  service:
+    # existingService: Name of existing browserless service
+    existingService: "browserless"
+    # existingServiceNamespace: Namespace of existing browserless service
+    existingServiceNamespace: "default"
+    # port: Port of the browserless service
+    port: 3000
+
+# mcp: MCP server configuration
+mcp:
+  # browserlessUrl: URL to connect to browserless
+  # If browserless.enabled is true, this will be auto-configured
+  # If using existing service, set this to the correct service URL
+  browserlessUrl: "http://browserless:3000"
+  
+  # browserlessToken: Optional bearer token for browserless authentication
+  browserlessToken: ""
+  
+  # existingSecret: Existing secret containing browserless token
+  # If set, browserlessToken will be ignored
+  existingSecret: ""
+  existingSecretKey: "browserless-token"
+  
+  # env: Additional environment variables
+  env: {}
+  
+  # extraVolumes: Additional volumes
+  extraVolumes: []
+  
+  # extraVolumeMounts: Additional volume mounts
+  extraVolumeMounts: []
+
+# ingress: Ingress configuration for the MCP server (if needed)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# monitoring: Monitoring configuration
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+
+# Additional labels to add to all resources
+commonLabels: {}
+
+# Additional annotations to add to all resources
+commonAnnotations: {}

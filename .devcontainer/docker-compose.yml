@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  selenium-mcp:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    environment:
+      - BROWSERLESS_URL=http://browserless:3000
+      - BROWSERLESS_TOKEN=
+      - PYTHONPATH=/workspace/src
+    depends_on:
+      - browserless
+
+  browserless:
+    image: browserless/chrome:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - CONNECTION_TIMEOUT=60000
+      - MAX_CONCURRENT_SESSIONS=10
+      - DEFAULT_BLOCK_ADS=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
